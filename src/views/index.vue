@@ -1,14 +1,30 @@
 <template>
-  <div>
-    <MainPage msg="Welcome to Your Vue.js App"/>
-  </div>
+  <el-container>
+    <el-header>
+      <PageHeader />
+    </el-header>
+    <el-main>
+      <!--<MainPage msg="Welcome to Your Vue.js App" v-if="currentPage===null"/>
+      <PopulationPage v-else-if="currentPage==='人口分布'" />-->
+      <PopulationPage />
+    </el-main>
+  </el-container>
 </template>
 
 <script>
 import MainPage from '../components/MainPage'
+import PageHeader from '../components/PageHeader'
+import PopulationPage from '../components/PopulationPage'
 
 export default {
+  data() {
+    return {
+      currentPage: null
+    }
+  },
   components: {
+    PopulationPage,
+    PageHeader,
     MainPage
   }
 }

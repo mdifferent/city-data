@@ -17,6 +17,11 @@ Vue.use(fullscreen)
 import Axios from "axios";
 Vue.prototype.$axios = Axios;
 
+import BaiduMap from 'vue-baidu-map'
+Vue.use(BaiduMap, {
+  ak: 'Lu2KqMUWylee4xzGQxANk2mHBjiaMWSh'
+})
+
 import router from "./router";
 import App from './App.vue'
 

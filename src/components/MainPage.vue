@@ -1,90 +1,48 @@
 <template>
-  <el-container>
-    <el-header>
-      <el-row type="flex" align="middle">
-        <el-col :span="2">
-          <p>首页</p>
-        </el-col>
-        <el-col :span="5">
-          <el-cascader placeholder="城市" :options="options" filterable></el-cascader>
-        </el-col>
-        <el-col :span="7">
-          <h1>城建设计手机数据可视化平台</h1>
-        </el-col>
-        <el-col :span="6">
-          <el-radio-group v-model="radio1" size="small">
-            <el-radio-button label="人口分布"></el-radio-button>
-            <el-radio-button label="出行指标"></el-radio-button>
-            <el-radio-button label="区域分析"></el-radio-button>
-          </el-radio-group>
-        </el-col>
-        <el-col :span="4">
-          <el-dropdown trigger="click">
-            <span class="el-dropdown-link">
-              用户
-              <i class="el-icon-arrow-down el-icon--right"></i>
-            </span>
-            <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item>控制台</el-dropdown-item>
-              <el-dropdown-item>注销</el-dropdown-item>
-            </el-dropdown-menu>
-          </el-dropdown>
-        </el-col>
-      </el-row>
-    </el-header>
-
-    <el-main>
-      <el-row type="flex">
-        <el-col :span="6">
-          <div v-for="item in tableData" v-bind:key="item.title">
-            <el-row>
-              <el-col :span="24">
-                <TotalAmount
-                  :title="item.title"
-                  :itemcount="item.count"
-                  :unit="item.unit"
-                  :url="item.url"
-                ></TotalAmount>
-              </el-col>
-            </el-row>
-          </div>
-        </el-col>
-        <el-col :span="12">
-          <el-row type="flex">
+  <div id="index_main">
+    <el-row type="flex">
+      <el-col :span="6">
+        <div v-for="item in tableData" v-bind:key="item.title">
+          <el-row>
             <el-col :span="24">
-              <TotalChart id="chinamap" :option="mapoption" :width="mapstyle.width" :height="mapstyle.height"></TotalChart>
+              <TotalAmount
+                :title="item.title"
+                :itemcount="item.count"
+                :unit="item.unit"
+                :url="item.url"
+              ></TotalAmount>
             </el-col>
           </el-row>
-          <el-row type="flex">
-            <el-col v-for="item in chartData1" v-bind:key="item.id">
+        </div>
+      </el-col>
+      <el-col :span="12">
+        <el-row type="flex">
+          <el-col :span="24">
+            <TotalChart
+              id="chinamap"
+              :option="mapoption"
+              :width="mapstyle.width"
+              :height="mapstyle.height"
+            ></TotalChart>
+          </el-col>
+        </el-row>
+        <el-row type="flex">
+          <el-col v-for="item in chartData1" v-bind:key="item.id">
+            <TotalChart :id="item.id" :option="item.option"></TotalChart>
+          </el-col>
+        </el-row>
+      </el-col>
+      <el-col :span="6">
+        <div v-for="item in chartData" v-bind:key="item.id">
+          <el-row>
+            <el-col :span="24">
               <TotalChart :id="item.id" :option="item.option"></TotalChart>
             </el-col>
           </el-row>
-        </el-col>
-        <el-col :span="6">
-          <div v-for="item in chartData" v-bind:key="item.id">
-            <el-row>
-              <el-col :span="24">
-                <TotalChart :id="item.id" :option="item.option"></TotalChart>
-              </el-col>
-            </el-row>
-          </div>
-        </el-col>
-      </el-row>
-    </el-main>
-
-    <el-footer>
-      <p>
-        For a guide and recipes on how to configure / customize this project,
-        <br>check out the
-        <a
-          href="https://cli.vuejs.org"
-          target="_blank"
-          rel="noopener"
-        >vue-cli documentation</a>.
-      </p>
-    </el-footer>
-  </el-container>
+        </div>
+      </el-col>
+    </el-row>
+  </div>
 </template>
 
 <script>
@@ -95,28 +53,6 @@ export default {
   name: "MainPage",
   data() {
     return {
-      options: [
-        {
-          value: "beijing",
-          label: "北京市"
-        },
-        {
-          value: "hebei",
-          label: "河北省",
-          children: [
-            {
-              value: "shijiazhuang",
-              label: "石家庄市"
-            },
-            {
-              value: "baoding",
-              label: "保定市"
-            }
-          ]
-        }
-      ],
-      radio1: "人口分布",
-      selectedOptions: [],
       tableData: [
         {
           title: "接入城市",
@@ -179,9 +115,6 @@ export default {
     TotalChart
   },
   methods: {
-    handleChange(value) {
-      this.$message(value);
-    },
     getTimeDisData(title) {
       return {
         title: {
