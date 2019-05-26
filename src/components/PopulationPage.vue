@@ -20,10 +20,18 @@
             :height="mapstyle.height"
             v-if="showEChartMap"
           ></TotalChart>
+          <GeoMapView
+            id="geomap"
+            :option="mapOption"
+            :width="mapstyle.width"
+            :height="mapstyle.height"
+            v-if="showGeoMap"
+            :geoSelectedHandler="geomapSelectedHandler"
+          ></GeoMapView>
         </el-col>
         <el-col :span="4">
           <PopulationTimeSlider v-if="showSlider" :onTimeChange="onTimeChange"/>
-          <PopulationChartBar v-if="showChartList" :chartData="chartData" />
+          <PopulationChartBar v-if="showChartList" :chartData="chartData"/>
         </el-col>
       </el-row>
     </el-main>
@@ -34,9 +42,16 @@
 import SubHeader from "../components/SubHeader";
 import MapView from "../components/MapView";
 import TotalChart from "../components/TotalChart";
+import GeoMapView from "../components/GeoMapView";
 
 import PopulationTimeSlider from "../components/PopulationTimeSlider";
-import PopulationChartBar from "../components/PopulationChartBar"
+import PopulationChartBar from "../components/PopulationChartBar";
+
+//MickData
+import beijingData from "../static/mockData/beijingData.json";
+import cityCoords from "../static/mockData/cityCoord.json";
+import transportData from "../static/mockData/transportData.json";
+
 export default {
   name: "PopulationPage",
   data() {
@@ -66,12 +81,15 @@ export default {
       showBaiduMap: false,
       showEChartMap: false,
       showChartList: false,
+      showGeoMap: false,
       mapOption: {},
       mapstyle: {
         width: "100%",
         height: "650px"
       },
-      chartData: []
+      chartData: [],
+
+      geoMap: ""
     };
   },
   props: {
@@ -90,7 +108,8 @@ export default {
     MapView,
     PopulationTimeSlider,
     TotalChart,
-    PopulationChartBar
+    PopulationChartBar,
+    GeoMapView
   },
   methods: {
     //SubHeader功能变化回调函数
@@ -113,14 +132,16 @@ export default {
           this.showBaiduMap = true;
           this.showEChartMap = false;
           this.showChartList = false;
+          this.showGeoMap = false;
           this.dimDef = null;
           this.option = this.getPopulationMapOption(pos, points);
           break;
         case 2:
           this.showSlider = false;
           this.showBaiduMap = false;
-          this.showEChartMap = true;
+          this.showEChartMap = false;
           this.showChartList = true;
+          this.showGeoMap = false;
           this.dimDef = [
             {
               text: "居住人口",
@@ -137,30 +158,54 @@ export default {
           ];
           //渲染地图
           var provinceName = this.getProvinceName();
-          var cityResidentData = this.getPopulationData(provinceName, "居住人口");
-          this.mapOption = this.getEmployMapOption(provinceName, cityResidentData, "居住人口");
+          var cityResidentData = this.getPopulationData(
+            provinceName,
+            "居住人口"
+          );
+          this.mapOption = this.getEmployMapOption(
+            provinceName,
+            cityResidentData,
+            "居住人口"
+          );
+          this.$nextTick(() => {
+            this.showEChartMap = true;
+          });
           //生成Chart
-          var cityEmployData = this.getPopulationData(provinceName, "就业人口")
-          var cityTempData = this.getPopulationData(provinceName, "流动人口")
-          var cityResidentChartOption = this.getPopulationChartOption("居住人口", cityResidentData)
-          var cityEmployChartOption = this.getPopulationChartOption("就业人口", cityEmployData)
-          var cityTempChartOption = this.getPopulationChartOption("流动人口", cityTempData)
-          this.chartData = [{
-            id: "1",
-            option: cityResidentChartOption
-          },{
-            id: "2",
-            option: cityEmployChartOption
-          },{
-            id: "3",
-            option: cityTempChartOption
-          }]
+          var cityEmployData = this.getPopulationData(provinceName, "就业人口");
+          var cityTempData = this.getPopulationData(provinceName, "流动人口");
+          var cityResidentChartOption = this.getPopulationChartOption(
+            "居住人口",
+            cityResidentData
+          );
+          var cityEmployChartOption = this.getPopulationChartOption(
+            "就业人口",
+            cityEmployData
+          );
+          var cityTempChartOption = this.getPopulationChartOption(
+            "流动人口",
+            cityTempData
+          );
+          this.chartData = [
+            {
+              id: "1",
+              option: cityResidentChartOption
+            },
+            {
+              id: "2",
+              option: cityEmployChartOption
+            },
+            {
+              id: "3",
+              option: cityTempChartOption
+            }
+          ];
           break;
         case 3:
           this.showSlider = false;
           this.showBaiduMap = false;
-          this.showEChartMap = true;
           this.showChartList = true;
+          this.showEChartMap = false;
+          this.showGeoMap = true;
           this.dimDef = [
             {
               text: "全国分布",
@@ -171,13 +216,19 @@ export default {
               command: 2
             }
           ];
-          break
+          this.mapOption = this.getTempPopMapOption("china", "北京");
+          this.chartData = [
+            {
+              id: "1",
+              option: this.getTransportPopChartOption(transportData) //TODO get data
+            }
+          ];
+          break;
       }
     },
 
     //SubHeader维度变化回调函数
     dimHandler(dim) {
-      this.$message(dim)
       switch (this.selectedFunc.command) {
         case 2:
           var cityName = this.getProvinceName();
@@ -244,13 +295,13 @@ export default {
       var color = [];
       switch (dim) {
         case "居住人口":
-          color = ['lightyellow', 'yellow', 'gold', 'khaki', 'darkkhaki'];
+          color = ["lightyellow", "yellow", "gold", "khaki", "darkkhaki"];
           break;
         case "就业人口":
-          color = ['lightpink', 'hotpink', 'red', 'crimson', 'darkred'];
+          color = ["lightpink", "hotpink", "red", "crimson", "darkred"];
           break;
         case "流动人口":
-          color = ['lightcyan','skyblue', 'blue', 'darkblue', 'midnightblue'];
+          color = ["lightcyan", "skyblue", "blue", "darkblue", "midnightblue"];
           break;
       }
       return {
@@ -291,49 +342,26 @@ export default {
     //获取职住分析地图数据
     getPopulationData(province, type) {
       //TODO: Request data
-      var result = [
-        {
-          name: "东城区",
-          value: 890
-        },
-        {
-          name: "西城区",
-          value: 200
-        },
-        {
-          name: "朝阳区",
-          value: 300
-        },
-        {
-          name: "丰台区",
-          value: 500
-        },
-        {
-          name: "石景山区",
-          value: 430
-        },
-        {
-          name: "海淀区",
-          value: 740
-        },
-        {
-          name: "通州区",
-          value: 745
-        },
-        {
-          name: "昌平区",
-          value: 869
-        }
-      ];
-      return result;
+      /*this.$axios
+        .get("../static/mockData/beijingData.json")
+        .then(response => {
+          this.$message(response.data);
+          return response.data;
+        })
+        .catch(function(error) {
+          //Console.error(error)
+        });*/
+
+      return beijingData;
     },
 
+    //生成职住分析图表option
     getPopulationChartOption(title, data) {
-      var xData = []
-      var yData = []
+      var xData = [];
+      var yData = [];
       for (let i = 0; i < data.length; ++i) {
-        xData.push(data[i].name)
-        yData.push(data[i].value)
+        xData.push(data[i].name);
+        yData.push(data[i].value);
       }
       return {
         title: {
@@ -370,6 +398,161 @@ export default {
         ]
       };
     },
+
+    //生成流动人口地图上的点线option
+    getTempPopMapOptionSeries(targetCity) {
+      var targetCityCoord = cityCoords[targetCity];
+      var lineData = [];
+      var scatterData = [];
+
+      transportData.forEach(element => {
+        this.$message(element["name"]);
+        lineData.push([
+          { coord: cityCoords[element["name"]] },
+          { coord: targetCityCoord }
+        ]);
+        scatterData.push({
+          name: element["name"],
+          value: cityCoords[element["name"]].concat([element["value"]])
+        });
+      });
+
+      var series = [];
+      series.push({
+        name: "连线",
+        type: "lines",
+        zlevel: 2,
+        lineStyle: {
+          normal: {
+            color: "#a6c84c",
+            width: 1,
+            opacity: 0.4,
+            curveness: 0.2
+          }
+        },
+        data: lineData
+      });
+      //地点
+      series.push({
+        name: "地点",
+        type: "effectScatter",
+        coordinateSystem: "geo",
+        zlevel: 1,
+        rippleEffect: {
+          brushType: "stroke"
+        },
+        label: {
+          normal: {
+            show: true,
+            position: "right",
+            formatter: "{b}"
+          }
+        },
+        symbolSize: function(val) {
+          return val[2] / 8;
+        },
+        itemStyle: {
+          normal: {
+            color: "#a6c84c"
+          }
+        },
+        data: scatterData
+      });
+
+      return series;
+    },
+
+    //生成流动人口地图option
+    getTempPopMapOption(province, targetCity) {
+      var option = {
+        backgroundColor: "#404a59",
+        title: {
+          text: "流动人口",
+          left: "center",
+          textStyle: {
+            color: "#fff"
+          }
+        },
+        tooltip: {
+          trigger: "item"
+        },
+        geo: {
+          map: province,
+          label: {
+            emphasis: {
+              show: false
+            }
+          },
+          selectedMode: "single",
+          itemStyle: {
+            normal: {
+              areaColor: "#323c48",
+              borderColor: "#404a59"
+            },
+            emphasis: {
+              areaColor: "#2a333d"
+            }
+          }
+        },
+        series: this.getTempPopMapOptionSeries(targetCity)
+      };
+      return option;
+    },
+
+    //生成流动人口图表option
+    getTransportPopChartOption(data) {
+      var fromList = [];
+      var valueList = [];
+      for (let i = 0; i < data.length; ++i) {
+        fromList.push(data[i].name);
+        valueList.push(data[i].value);
+      }
+      var option = {
+        title: {
+          text: "客流来源"
+        },
+        tooltip: {
+          trigger: "axis",
+          axisPointer: {
+            type: "shadow"
+          }
+        },
+        grid: {
+          left: "3%",
+          right: "4%",
+          bottom: "3%",
+          containLabel: true
+        },
+        xAxis: {
+          type: "value",
+          boundaryGap: [0, 0.01]
+        },
+        yAxis: {
+          type: "category",
+          data: fromList
+        },
+        series: [
+          {
+            type: "bar",
+            data: valueList
+          }
+        ]
+      };
+      return option;
+    },
+
+    //流动人口全国地图点击回调函数
+    geomapSelectedHandler(param) {
+      var provinceName = param.batch[0].name.trim()
+      this.$message(provinceName)
+      this.mapOption = this.getTempPopMapOption("china", provinceName);
+      this.chartData = [
+        {
+          id: "1",
+          option: this.getTransportPopChartOption(transportData) //TODO get data
+        }
+      ];
+    }
   }
 };
 </script>

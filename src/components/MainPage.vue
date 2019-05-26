@@ -18,12 +18,13 @@
       <el-col :span="12">
         <el-row type="flex">
           <el-col :span="24">
-            <TotalChart
+            <GeoMapView
               id="chinamap"
               :option="mapoption"
               :width="mapstyle.width"
               :height="mapstyle.height"
-            ></TotalChart>
+              :geoSelectedHandler="geomapSelectedHandler"
+            ></GeoMapView>
           </el-col>
         </el-row>
         <el-row type="flex">
@@ -48,6 +49,7 @@
 <script>
 import TotalAmount from "./TotalAmount";
 import TotalChart from "./TotalChart";
+import GeoMapView from "./GeoMapView";
 
 export default {
   name: "MainPage",
@@ -112,7 +114,8 @@ export default {
   },
   components: {
     TotalAmount,
-    TotalChart
+    TotalChart,
+    GeoMapView
   },
   methods: {
     getTimeDisData(title) {
@@ -276,6 +279,9 @@ export default {
           }
         ]
       };
+    },
+    geomapSelectedHandler(param) {
+      this.$message(param.batch[0].name)
     }
   }
 };

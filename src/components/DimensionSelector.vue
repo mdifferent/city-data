@@ -27,6 +27,11 @@ export default {
   mounted() {
     if (this.dimDef != null && this.dimDef.length > 0)
       this.selectedRadio = this.dimDef[0].text
+  },
+  watch: {
+    dimDef(newVal) {
+      this.selectedRadio = newVal[0].text
+    }
   }
 };
 </script>
