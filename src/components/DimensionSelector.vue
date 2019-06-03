@@ -7,7 +7,7 @@
       v-for="dim in dimDef"
       :key="dim.command"
     >
-      <el-radio-button :label="dim.text"></el-radio-button>
+    <el-radio-button :label="dim.text"></el-radio-button>
     </el-radio-group>
   </div>
 </template>
@@ -17,21 +17,22 @@ export default {
   name: "DimensionSelector",
   data() {
     return {
+      dimDef: [{
+          text: "原始数据",
+          command: "1"
+        },{
+          text: "扩样数据",
+          command: "2"
+        }],
       selectedRadio: String
     };
   },
   props: {
-    dimDef: Array,
     handler: Function
   },
   mounted() {
     if (this.dimDef != null && this.dimDef.length > 0)
       this.selectedRadio = this.dimDef[0].text
-  },
-  watch: {
-    dimDef(newVal) {
-      this.selectedRadio = newVal[0].text
-    }
   }
 };
 </script>

@@ -41,13 +41,12 @@ export default {
     this.init();
   },
   watch: {
-    option: function(newVal, oldVal) {
+    option: function(newVal) {
       if (this.chart) {
         if (newVal) {
+          console.log("watch" + newVal)
           this.chart.setOption(newVal);
-        } else {
-          this.chart.setOption(oldVal);
-        }
+        } 
         this.chart.resize();
       } else {
         setTimeout(() => {

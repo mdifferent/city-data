@@ -3,7 +3,6 @@
     <el-slider
       v-model="value"
       vertical
-      range
       :min="5"
       :max="23"
       height="600px"
@@ -19,7 +18,6 @@ export default {
   name: "PopulationTimeSlider",
   data() {
     return {
-      value: [5, 5],
       marks: {
         5: "5:00",
         6: "6:00",
@@ -42,7 +40,8 @@ export default {
         23: "23:00"
       },
       isAuto: false,
-      iconName: "el-icon-video-play"
+      iconName: "el-icon-video-play",
+      value: 5
     };
   },
   props: {

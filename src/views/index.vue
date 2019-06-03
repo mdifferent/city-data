@@ -4,35 +4,43 @@
       <PageHeader />
     </el-header>
     <el-main>
-      <!--<MainPage msg="Welcome to Your Vue.js App" v-if="currentPage===null"/>
-      <PopulationPage v-else-if="currentPage==='人口分布'" />-->
-      <PopulationPage />
+      <MainPage v-if="currentPage===null"/>
+      <PopulationPage v-else-if="currentPage === '人口分布'"/>
+      <TravelPage v-else-if="currentPage === '出行指标'"/>
     </el-main>
   </el-container>
 </template>
 
 <script>
-import MainPage from '../components/MainPage'
-import PageHeader from '../components/PageHeader'
-import PopulationPage from '../components/PopulationPage'
+import MainPage from "../components/MainPage";
+import PageHeader from "../components/PageHeader";
+import PopulationPage from "../components/PopulationPage";
+import TravelPage from "../components/TravelPage";
+
+import { mapState } from 'vuex'
 
 export default {
   data() {
     return {
-      currentPage: null
-    }
+    };
+  },
+  computed: {
+    ...mapState({
+      currentPage: state => state.currentPage
+    })
   },
   components: {
-    PopulationPage,
     PageHeader,
-    MainPage
+    MainPage,
+    PopulationPage,
+    TravelPage
   }
-}
+};
 </script>
 
 <style>
 #app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  font-family: "Avenir", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;

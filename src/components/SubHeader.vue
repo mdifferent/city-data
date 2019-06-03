@@ -2,20 +2,20 @@
   <div id="subheader">
     <el-row>
       <el-col :span="4">
-        <TimeRangeSelector defaultText="日期选择" :rangeDef="dateRangeDef"/>
-      </el-col>
-      <el-col :span="4">
-        <TimeRangeSelector defaultText="时间段选择" :rangeDef="timeRangeDef"/>
-      </el-col>
-      <el-col :span="4">
         <FunctionSelector
           :defaultText="selectedFuncText == null ? '功能选择' : selectedFuncText"
           :funcDef="funcDef"
           :handler="funcHandler"
         />
       </el-col>
+      <el-col :span="4">
+        <TimeRangeSelector defaultText="日期选择" :rangeDef="dateRangeDef" :v_if="dateAvaliable" @handler="dateHandler"/>
+      </el-col>
+      <el-col :span="4">
+        <TimeRangeSelector defaultText="时间段选择" :rangeDef="timeRangeDef" :v_if="timeAvaliable" @handler="timeHandler"/>
+      </el-col>
       <el-col :span="12">
-        <DimensionSelector :dimDef="dimDef" :handler="dimHandler" v-if="dimDef!==null"/>
+        <DimensionSelector :handler="dimHandler" v-if="showDim"/>
       </el-col>
     </el-row>
   </div>
@@ -51,15 +51,15 @@ export default {
       dateRangeDef: [
         {
           text: "工作日",
-          command: "1"
+          command: "w"
         },
         {
           text: "周末",
-          command: "2"
+          command: "e"
         },
         {
           text: "节假日",
-          command: "3"
+          command: "h"
         }
       ]
     };
@@ -68,8 +68,21 @@ export default {
     funcDef: Array,
     funcHandler: Function,
     selectedFuncText: String,
-    dimDef: Array,
-    dimHandler: Function
+    dateHandler: Function,
+    timeHandler: Function,
+    dimHandler: Function,
+    dateAvaliable: {
+      type: Boolean,
+      default: true
+    },
+    timeAvaliable: {
+      type: Boolean,
+      default: true
+    },
+    showDim: {
+      type: Boolean,
+      default: true
+    }
   },
   watch: {
     selectedFuncText(newVal) {

@@ -1,5 +1,5 @@
 <template>
-  <el-dropdown @command="handleCommand">
+  <el-dropdown @command="handler">
     <span class="el-dropdown-link">
       {{selectedText}}
       <i class="el-icon-arrow-down el-icon--right"></i>
@@ -20,16 +20,8 @@ export default {
   },
   props: {
     rangeDef: Array,
-    defaultText: String
-  },
-  methods: {
-    handleCommand(command) {
-      if (command.command === "0") {
-        //TODO add customized time range
-      } else {
-        this.selectedText = command.text;
-      }
-    }
+    defaultText: String,
+    handler: Function
   }
 };
 </script>
