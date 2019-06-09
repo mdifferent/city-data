@@ -108,25 +108,25 @@ export default {
               title: "接入城市",
               count: response.data.cityCount,
               unit: "座",
-              url: "https://cn.vuejs.org/images/logo.png"
+              //url: "https://cn.vuejs.org/images/logo.png"
             },
             {
               title: "覆盖范围",
               count: response.data.districtCount,
               unit: "个",
-              url: "https://cn.vuejs.org/images/logo.png"
+              //url: "https://cn.vuejs.org/images/logo.png"
             },
             {
               title: "覆盖用户",
               count: response.data.cuUserCount,
               unit: "人",
-              url: "https://cn.vuejs.org/images/logo.png"
+              //url: "https://cn.vuejs.org/images/logo.png"
             },
             {
               title: "统计指标",
               count: response.data.indexCount,
               unit: "项",
-              url: "https://cn.vuejs.org/images/logo.png"
+              //url: "https://cn.vuejs.org/images/logo.png"
             }
           ];
         })

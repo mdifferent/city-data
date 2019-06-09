@@ -2,9 +2,9 @@
 <!--首页系统指标模板（左侧）-->
 <template>
   <el-row type="flex" align="middle">
-    <el-col :span="8">
+    <!--<el-col :span="8">
       <el-image :src="url" fit="cover"></el-image>
-    </el-col>
+    </el-col>-->
     <el-col :span="16">
       <p>{{title}}</p>
       <el-row type="flex" align="middle">

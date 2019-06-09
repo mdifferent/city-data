@@ -9,7 +9,16 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     currentCity: [],
-    currentPage: null
+    currentPage: null,
+    currentDateType: {
+      text: "工作日",
+      command: "w"
+    },
+    currentTimeRange: {
+      text: "早高峰",
+      command: "1"
+    },
+    currentCuky: "cu"
   },
   mutations: {
     changeCity (state, newCity) {
@@ -17,6 +26,18 @@ export default new Vuex.Store({
     },
     changePage (state, page) {
       state.currentPage = page
+    },
+    changeDateType (state, type) {
+      state.currentDateType = type
+    },
+    changeTimeRange (state, time) {
+      state.currentTimeRange = time
+    },
+    changeCuky (state, cuky) {
+      if (cuky === '原始数据')
+        state.currentCuky = 'cu'
+      else if (cuky === '扩样数据')
+        state.currentCuky = 'ky'
     }
   },
   actions:{

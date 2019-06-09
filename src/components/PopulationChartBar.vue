@@ -16,7 +16,6 @@ import TotalChart from "../components/TotalChart";
 export default {
   data() {
     return {
-      chartDatas: []
     };
   },
   props: { chartData: Array },

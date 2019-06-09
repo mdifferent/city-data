@@ -11,7 +11,7 @@
         <h1>城建设计手机数据可视化平台</h1>
       </el-col>
       <el-col :span="6">
-        <el-radio-group v-model="radio1" size="medium" @change="changePage">
+        <el-radio-group v-model="radio1" size="medium" @change="onPageButtonClicked">
           <el-radio-button label="人口分布"></el-radio-button>
           <el-radio-button label="出行指标"></el-radio-button>
           <el-radio-button label="区域分析"></el-radio-button>
@@ -34,7 +34,7 @@
 </template>
 
 <script>
-import { mapMutations } from 'vuex'
+import { mapMutations, mapState } from 'vuex'
 export default {
   data() {
     return {
@@ -45,11 +45,25 @@ export default {
   mounted() {
     this.getCityList();
   },
+    computed: {
+    ...mapState({
+      currentCity: state => state.currentCity
+    })
+  },
   methods: {
     ...mapMutations({
       changeCity: 'changeCity',
       changePage: 'changePage'
     }),
+    onPageButtonClicked(newVal) {
+      if (this.currentCity.length > 0) {
+        this.changePage(newVal)
+      } else {
+        this.$alert('请先选择当前城市', '提示', {
+          confirmButtonText: '确定',
+        });
+      }
+    },
     getCityList() {
       this.$axios.get("index/city")
       .then(response => {

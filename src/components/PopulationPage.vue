@@ -4,10 +4,7 @@
       <SubHeader
         :funcDef="funcDef"
         :funcHandler="funcHandler"
-        :dateHandler="dateHandler"
-        :timeHandler="timeHandler"
         :selectedFuncText="selectedFunc.text"
-        :dimHandler="dimHandler"
       />
     </el-header>
     <el-main>
@@ -69,20 +66,16 @@ export default {
         width: "100%",
         height: "650px"
       },
-      chartData: [],
-
-      //流动人口当前选择省份
-      selectedProvince: null,
-      selectedDim: null,
-      currentDate: "w",
-      currentTime: 5,
-      currentCuky: "cu"
+      chartData: []
     };
   },
 
   computed: {
     ...mapState({
-      currentCity: state => state.currentCity
+      currentCity: state => state.currentCity,
+      currentTime: state => state.currentTimeRange,
+      currentDate: state => state.currentDateType,
+      currentCuky: state => state.currentCuky,
     })
   },
   components: {
@@ -100,6 +93,15 @@ export default {
   watch: {
     currentCity(newVal) {
       this.updateView();
+    },
+    currentTime(newVal) {
+      this.updateView();
+    },
+    currentDate(newVal) {
+      this.updateView();
+    },
+    currentCuky(newVal) {
+      this.updateView()
     }
   },
   methods: {
@@ -161,11 +163,10 @@ export default {
             "pop/dynamic?city=" +
             cityName +
             "&date=" +
-            this.currentDate +
+            this.currentDate.command +
             "&cuky=" +
             this.currentCuky +
-            "&time=" +
-            this.currentTime;
+            "&time=";
           var pointReq = this.$axios.get(pointUrl);
           var centerCoordRq = this.$axios.get(
             "basic/cityCoords?city=" + cityName
@@ -239,7 +240,7 @@ export default {
       this.updateView()
     },
 
-    dateHandler(date) {
+    /*dateHandler(date) {
       console.log(date)
       this.updateView()
     },
@@ -247,7 +248,7 @@ export default {
     timeHandler(time) {
       console.log(time)
       this.updateView()
-    },
+    },*/
 
     getCityPinyin(provinceName) {
       return provincePinyin[provinceName];
