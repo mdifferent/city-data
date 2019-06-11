@@ -26,7 +26,8 @@ export default {
   },
   computed: {
     ...mapState({
-      currentPage: state => state.currentPage
+      currentPage: state => state.currentPage,
+      currentCity: state => state.currentCity
     })
   },
   components: {

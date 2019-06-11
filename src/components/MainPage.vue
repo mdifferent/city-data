@@ -50,6 +50,7 @@
 import TotalAmount from "./TotalAmount";
 import TotalChart from "./TotalChart";
 import GeoMapView from "./GeoMapView";
+import { Promise } from "q";
 
 export default {
   name: "MainPage",
@@ -58,32 +59,32 @@ export default {
       tableData: [],
       chartData: [
         {
-          id: "time_dis",
-          option: this.getTimeDisData("出行时间分布")
+          id: "time",
+          option: {}
         },
         {
-          id: "distance_dis",
-          option: this.getDistanceDisData("出行距离分布")
+          id: "distance",
+          option: {}
         },
         {
-          id: "comsume_dis",
-          option: this.getDistanceDisData("出行时耗分布")
+          id: "comsume",
+          option: {}
         }
       ],
       chartData1: [
         {
-          id: "distance_dis1",
+          id: "age",
           option: {}
         },
         {
-          id: "comsume_dis1",
+          id: "gender",
           option: {}
         }
       ],
-      mapOption: [],
+      mapOption: {},
       mapstyle: {
         width: "100%",
-        height: "650px"
+        height: "800px"
       },
       cityInfo: Array
     };
@@ -94,92 +95,53 @@ export default {
     GeoMapView
   },
   mounted() {
+    //获取系统总体数据
     this.getTotalData();
+    //获取地图数据
     this.getScatterData();
   },
   methods: {
+    //获取系统数据
     getTotalData() {
       this.$axios
         .get("index/")
         .then(response => {
-          console.log(response.data);
           this.tableData = [
             {
               title: "接入城市",
               count: response.data.cityCount,
-              unit: "座",
+              unit: "座"
               //url: "https://cn.vuejs.org/images/logo.png"
             },
             {
               title: "覆盖范围",
               count: response.data.districtCount,
-              unit: "个",
+              unit: "个"
               //url: "https://cn.vuejs.org/images/logo.png"
             },
             {
               title: "覆盖用户",
               count: response.data.cuUserCount,
-              unit: "人",
+              unit: "人"
               //url: "https://cn.vuejs.org/images/logo.png"
             },
             {
               title: "统计指标",
               count: response.data.indexCount,
-              unit: "项",
+              unit: "项"
               //url: "https://cn.vuejs.org/images/logo.png"
             }
           ];
         })
         .catch(error => console.log(error));
     },
-    getTimeDisData(title) {
-      return {
-        title: {
-          text: title
-        },
-        xAxis: {
-          type: "category",
-          boundaryGap: false,
-          data: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-        },
-        yAxis: {
-          type: "value"
-        },
-        series: [
-          {
-            data: [820, 932, 901, 934, 1290, 1330, 1320],
-            type: "line",
-            itemStyle: {
-              normal: {
-                color: "#00c1de",
-                shadowBlur: 8,
-                shadowColor: "#25d5f0",
-                borderColor: "#00c1de",
-                borderWidth: 2,
-                backgroundColor: "transparent"
-              }
-            },
-            areaStyle: {
-              normal: {
-                color: new this.$echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                  {
-                    offset: 0,
-                    color: "#00c1de"
-                  },
-                  {
-                    offset: 1,
-                    color: "rgba(0,0,0,0)"
-                  }
-                ])
-              }
-            }
-          }
-        ]
-      };
-    },
 
+    getTimeDisData(city) {},
+
+    //获取地图数据
     getScatterData() {
-      this.$axios.get("/index/cityInfo")
+      this.$axios
+        .get("/index/cityInfo")
         .then(response => {
           var scatterData = response.data;
           var series = this.getMapSeries(scatterData);
@@ -194,7 +156,7 @@ export default {
         name: "地点",
         type: "effectScatter",
         coordinateSystem: "geo",
-        zlevel: 1,
+        /*zlevel: 1,
         rippleEffect: {
           brushType: "stroke"
         },
@@ -212,7 +174,7 @@ export default {
           normal: {
             color: "#a6c84c"
           }
-        },
+        },*/
         data: scatterData
       });
       return series;
@@ -230,14 +192,13 @@ export default {
               show: false
             }
           },
-          selectedMode: "single",
           itemStyle: {
             normal: {
-              areaColor: "#323c48",
+              areaColor: "#87CEEB",
               borderColor: "#404a59"
             },
             emphasis: {
-              areaColor: "#2a333d"
+              areaColor: "#87CEEB"
             }
           }
         },
@@ -245,21 +206,47 @@ export default {
       };
     },
 
-    getAgeData(city) {
-      this.$axios.get("/index/age?city=" + city)
+    getPieData(city, type, title, index) {
+      let url = `index/chart/${type}?city=${city}`;
+      this.$axios
+        .get(url)
         .then(response => {
-            return this.getPieChart("年龄分布", response.data)
+          let series = this.getPieChartSeries(title, response.data);
+          let option = this.getPieChartOption(title, series);
+          this.$set(this.chartData1, index, { id: title, option: option });
         })
+        .catch(error => console.log(error));
     },
 
-    getGenderData(city) {
-      this.$axios.get("/index/gender?city=" + city)
-        .then(response => {
-            return this.getPieChart("性别分布", response.data)
-        })
+    getPieChartSeries(title, data) {
+      return {
+        name: title,
+        type: "pie",
+        radius: ["50%", "70%"],
+        avoidLabelOverlap: false,
+        label: {
+          normal: {
+            show: false,
+            position: "center"
+          },
+          emphasis: {
+            show: true,
+            textStyle: {
+              fontSize: "30",
+              fontWeight: "bold"
+            }
+          }
+        },
+        labelLine: {
+          normal: {
+            show: false
+          }
+        },
+        data: data
+      };
     },
 
-    getPieChart(title, data) {
+    getPieChartOption(title, series) {
       return {
         title: {
           text: title
@@ -268,85 +255,74 @@ export default {
           trigger: "item",
           formatter: "{a} <br/>{b}: {c} ({d}%)"
         },
-        series: [
-          {
-            name: "访问来源",
-            type: "pie",
-            radius: ["50%", "70%"],
-            avoidLabelOverlap: false,
-            label: {
-              normal: {
-                show: false,
-                position: "center"
-              },
-              emphasis: {
-                show: true,
-                textStyle: {
-                  fontSize: "30",
-                  fontWeight: "bold"
-                }
-              }
-            },
-            labelLine: {
-              normal: {
-                show: false
-              }
-            },
-            data: data
-          }
-        ]
+        series: series
       };
     },
-    getDistanceDisData(title) {
+
+    getBarData(city, type, title, index) {
+      let url = `index/chart/${type}?city=${city}`;
+      this.$axios
+        .get(url)
+        .then(response => {
+          let xData = response.data.map(d => d.name);
+          let yData = response.data.map(d => d.value);
+          let series = [this.getBarSeries(title, yData)];
+          let option = this.getBarChartOption(title, xData, series);
+          this.$set(this.chartData, index, { id: title, option: option });
+        })
+        .catch(error => console.log(error));
+    },
+
+    getBarSeries(title, yData) {
       return {
+        name: title,
+        type: "bar",
+        barGap: 0,
+        data: yData
+      };
+    },
+
+    getBarChartOption(title, xData, series) {
+      return {
+        color: ["#006699", "#e5323e"],
         title: {
           text: title
         },
         tooltip: {
           trigger: "axis",
           axisPointer: {
-            // 坐标轴指示器，坐标轴触发有效
             type: "shadow" // 默认为直线，可选为：'line' | 'shadow'
           }
         },
         xAxis: {
-          data: ["点", "击", "柱", "子", "或", "者"]
+          data: xData,
+          axisLabel: {
+            interval: 0,
+            rotate: 75
+          }
         },
         yAxis: [
           {
             type: "value"
           }
         ],
-        series: [
-          {
-            // For shadow
-            type: "bar",
-            itemStyle: {
-              normal: { color: "rgba(0,0,0,0.05)" }
-            },
-            barGap: "-100%",
-            barCategoryGap: "40%",
-            data: [500, 500, 500, 500, 500, 500],
-            animation: false
-          },
-          {
-            type: "bar",
-            itemStyle: {
-              normal: {
-                color: new this.$echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                  { offset: 0, color: "#83bff6" },
-                  { offset: 0.5, color: "#188df0" },
-                  { offset: 1, color: "#188df0" }
-                ])
-              }
-            },
-            data: [220, 182, 191, 234, 290, 330]
-          }
-        ]
+        series: series
       };
     },
-    geomapSelectedHandler(param) {
-      this.$message(param.batch[0].name);
+
+    geomapSelectedHandler(params) {
+      //console.log(params)
+      if (
+        params.seriesType === "effectScatter" &&
+        params.seriesName === "地点"
+      ) {
+        let cityName = params.name + "市";
+        this.getPieData(cityName, "age", "年龄分布", 0);
+        this.getPieData(cityName, "gender", "性别分布", 1);
+        this.getBarData(cityName, "time", "出行时间分布", 0);
+        this.getBarData(cityName, "distance", "出行距离分布", 1);
+        this.getBarData(cityName, "consume", "出行时耗分布", 2);
+      }
     }
   }
 };

@@ -19,6 +19,7 @@ export default {
   },
   watch: {
     option(newVal) {
+      this.bmap.clearOverlays();
       this.myChart.setOption(newVal);
     },
     datas(datas) {

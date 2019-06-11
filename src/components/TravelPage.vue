@@ -97,7 +97,6 @@ export default {
   },
   methods: {
     async updateView() {
-      console.log("begin update view!");
       switch (this.selectedFunc.command) {
         case 1:
           this.showChartList = true;
@@ -107,18 +106,17 @@ export default {
           this.getGeneralChartData();
           break;
         case 2:
-          this.showChartList = false;
-          this.$nextTick(() => {
-            this.showChartList = true;
-            this.getDistrictOdChartData();
-          })
-          this.drawDistrictMap([]);
+          this.showChartList = true;
           let odMapSeries = await this.getOdDataOnMap();
           this.updateMap(odMapSeries);
+          this.drawDistrictMap([]);
+          this.getDistrictOdChartData();
           break;
         case 3:
           this.showChartList = false;
-          this.getGridOdMap();
+          this.chartData = []
+          let mapData = await this.getGridOdMapData();
+          this.updateMap(mapData);
           break;
       }
     },
@@ -201,10 +199,9 @@ export default {
           .all([intraReq, interReq])
           .then(
             this.$axios.spread((intraRes, interRes) => {
-              console.log(intraRes.data.length);
               let series = [
-                this.getIntraSeries(intraRes.data),
-                this.getInterSeries(interRes.data)
+                this.getIntraSeries(intraRes.data.map(data => data.value))
+                //this.getInterSeries(interRes.data)
               ];
               resolve(series);
             })
@@ -219,11 +216,12 @@ export default {
     //区域OD: 获取地图出行数据
     getIntraSeries(data) {
       return {
+        id: "intra",
         name: "区内出行",
-        type: "effectScatter",
+        type: "scatter",
         zlevel: 1,
         coordinateSystem: "bmap",
-        data: data,
+        data: data /*,
         symbolSize: function(val) {
           return val[2] / 10;
         },
@@ -245,7 +243,7 @@ export default {
             shadowBlur: 10,
             shadowColor: "#333"
           }
-        }
+        }*/
       };
     },
 
@@ -256,29 +254,22 @@ export default {
         type: "lines",
         coordinateSystem: "bmap",
         zlevel: 2,
-        symbol: ["none", "arrow"],
-        symbolSize: 10,
         effect: {
           show: true,
           period: 6,
           trailLength: 0,
-          symbolSize: 15
+          symbol: "arrow",
+          symbolSize: 10
         },
         lineStyle: {
           normal: {
             color: "#a6c84c",
-            width: 1,
+            width: 2,
             opacity: 0.6,
             curveness: 0.2
           }
         },
-        data: data.map(data => {
-          return {
-            fromName: data.oname,
-            toName: data.dname,
-            coords: [data.ocoord, data.dcoord]
-          };
-        })
+        data: data
       };
     },
 
@@ -364,8 +355,12 @@ export default {
         },
         xAxis: [
           {
-            type: isVertical ? 'value': "category",
-            data: isVertical ? null : xData
+            type: isVertical ? "value" : "category",
+            data: isVertical ? null : xData,
+            axisLabel: {
+              interval: 0,
+              rotate: 40
+            }
           }
         ],
         yAxis: [
@@ -424,15 +419,18 @@ export default {
           let xData = data.map(curr => curr["name"]);
           let yoData = data.map(curr => curr["value"][0]);
           let ydData = data.map(curr => curr["value"][1]);
-          let yData = [{
-            color: "#006699",
-            name: "O Value",
-            value: yoData
-          }, {
-            color: "#e5323e",
-            name: "D Value",
-            value: ydData
-          }]
+          let yData = [
+            {
+              color: "#006699",
+              name: "O Value",
+              value: yoData
+            },
+            {
+              color: "#e5323e",
+              name: "D Value",
+              value: ydData
+            }
+          ];
           let option = this.barOption(xData, yData, false);
           this.$set(this.chartData, 1, { id: "1", option: option });
         })
@@ -449,15 +447,18 @@ export default {
           let xData = data.map(curr => curr["name"]);
           let yoData = data.map(curr => curr["value"][0]);
           let ydData = data.map(curr => curr["value"][1]);
-          let yData = [{
-            color: "#006699",
-            name: "O Value",
-            value: yoData
-          }, {
-            color: "#e5323e",
-            name: "D Value",
-            value: ydData
-          }]
+          let yData = [
+            {
+              color: "#006699",
+              name: "O Value",
+              value: yoData
+            },
+            {
+              color: "#e5323e",
+              name: "D Value",
+              value: ydData
+            }
+          ];
           let option = this.barOption(xData, yData, false);
           this.$set(this.chartData, 2, { id: "2", option: option });
         })
@@ -490,11 +491,13 @@ export default {
         .then(response => {
           let data = response.data;
           let xData = data.map(curr => curr["name"]);
-          let yData =  [{
-            color: "#006699",
-            name: "O Value",
-            value : data.map(curr => curr["value"])
-          }];
+          let yData = [
+            {
+              color: "#006699",
+              name: "O Value",
+              value: data.map(curr => curr["value"])
+            }
+          ];
           let option = this.barOption(xData, yData, true);
           this.$set(this.chartData, 0, { id: "0", option: option });
         })
@@ -509,11 +512,13 @@ export default {
         .then(response => {
           let data = response.data;
           let xData = data.map(curr => curr["name"]);
-          let yData =  [{
-            color: "#006699",
-            name: "O Value",
-            value : data.map(curr => curr["value"])
-          }];
+          let yData = [
+            {
+              color: "#006699",
+              name: "O Value",
+              value: data.map(curr => curr["value"])
+            }
+          ];
           let option = this.barOption(xData, yData, false);
           this.$set(this.chartData, 1, { id: "1", option: option });
         })
@@ -524,17 +529,39 @@ export default {
         });
     },
 
-    getGridOdMap() {},
+    getGridOdMapData() {
+      return new Promise((resolve, reject) => {
+        var len = this.currentCity.length;
+        var cityName = this.currentCity[len - 1];
+        let gridOdUrl = `od/grid?city=${cityName}&date=${
+          this.currentDate
+        }&cuky=${this.currentCuky}&time=${this.currentTime}`;
+        this.$axios
+          .get(gridOdUrl)
+          .then(response => {
+            let data = [this.getInterSeries(response.data)];
+            resolve(data);
+          })
+          .catch(error => {
+            reject(error);
+            console.log(error);
+          });
+      });
+    },
 
     getMapOption(center, series) {
       return {
+        title: {
+          id: "map",
+          text: "map"
+        },
         animation: false,
         bmap: {
           center: center,
           zoom: 5,
           roam: true
         },
-        visualMap: {
+        /*visualMap: {
           show: false,
           top: "top",
           min: 0,
@@ -544,7 +571,7 @@ export default {
           inRange: {
             color: ["blue", "yellow", "red"]
           }
-        },
+        },*/
         series: series
       };
     }

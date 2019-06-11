@@ -24,9 +24,7 @@ export default {
       type: String,
       default: "300px"
     },
-    option: {
-      type: Object
-    },
+    option: {},
     geoSelectedHandler: Function
   },
   computed: {
@@ -44,7 +42,7 @@ export default {
     option: function(newVal) {
       if (this.chart) {
         if (newVal) {
-          console.log("watch" + newVal)
+          console.log(newVal)
           this.chart.setOption(newVal);
         } 
         this.chart.resize();
@@ -55,7 +53,7 @@ export default {
       }
     },
     geoSelectedHandler: function(newVal) {
-      this.chart.on("geoselectchanged", newVal);
+      this.chart.on("click", newVal);
     }
   },
   methods: {
@@ -63,7 +61,7 @@ export default {
       this.chart = this.$echarts.init(document.getElementById(this.id));
       this.chart.setOption(this.option);
       window.addEventListener("resize", this.chart.resize);
-      this.chart.on("geoselectchanged", this.geoSelectedHandler);
+      this.chart.on("click", this.geoSelectedHandler);
     }
   }
 };

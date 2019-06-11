@@ -34,42 +34,52 @@
 </template>
 
 <script>
-import { mapMutations, mapState } from 'vuex'
+import { mapMutations, mapState } from "vuex";
 export default {
   data() {
     return {
       options: [],
-      radio1: null,
+      radio1: null
     };
   },
   mounted() {
     this.getCityList();
   },
-    computed: {
+  computed: {
     ...mapState({
-      currentCity: state => state.currentCity
+      currentCity: state => state.currentCity,
+      currentPage: state => state.currentPage
     })
+  },
+  watch: {
+    currentCity(newVal, oldVal) {
+      if (oldVal.length == 0 && this.currentPage == null) {
+        this.changePage('人口分布')
+        this.radio1 = '人口分布'
+      }
+    }
   },
   methods: {
     ...mapMutations({
-      changeCity: 'changeCity',
-      changePage: 'changePage'
+      changeCity: "changeCity",
+      changePage: "changePage"
     }),
     onPageButtonClicked(newVal) {
       if (this.currentCity.length > 0) {
-        this.changePage(newVal)
+        this.changePage(newVal);
       } else {
-        this.$alert('请先选择当前城市', '提示', {
-          confirmButtonText: '确定',
+        this.$alert("请先选择当前城市", "提示", {
+          confirmButtonText: "确定"
         });
       }
     },
     getCityList() {
-      this.$axios.get("index/city")
-      .then(response => {
-        this.options = response.data
-      })
-      .catch(error => console.log(error))
+      this.$axios
+        .get("index/city")
+        .then(response => {
+          this.options = response.data;
+        })
+        .catch(error => console.log(error));
     }
   }
 };
