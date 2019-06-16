@@ -42,7 +42,6 @@ export default {
     option: function(newVal) {
       if (this.chart) {
         if (newVal) {
-          console.log(newVal)
           this.chart.setOption(newVal);
         } 
         this.chart.resize();

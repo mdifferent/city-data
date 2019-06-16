@@ -50,7 +50,6 @@
 import TotalAmount from "./TotalAmount";
 import TotalChart from "./TotalChart";
 import GeoMapView from "./GeoMapView";
-import { Promise } from "q";
 
 export default {
   name: "MainPage",
@@ -135,8 +134,6 @@ export default {
         })
         .catch(error => console.log(error));
     },
-
-    getTimeDisData(city) {},
 
     //获取地图数据
     getScatterData() {

@@ -1,13 +1,14 @@
 <template>
   <div>
     <el-slider
-      v-model="value"
+      v-model="time"
       vertical
       :min="5"
       :max="23"
       height="600px"
       :marks="marks"
       @change="onTimeChange"
+      :disabled="isAuto"
     ></el-slider>
     <el-button circle :icon="iconName" @click="onPlayClicked" size="medium"></el-button>
   </div>
@@ -39,20 +40,30 @@ export default {
         22: "22:00",
         23: "23:00"
       },
-      isAuto: false,
       iconName: "el-icon-video-play",
-      value: 5
+      time: 5
     };
   },
   props: {
-    onTimeChange: Function
+    onTimeChange: Function,
+    onPlayClicked: Function,
+    value: {
+      type: Number,
+      default: 5
+    },
+    isAuto: {
+      type: Boolean, 
+      default: false
+    }
   },
-  methods: {
-    onPlayClicked() {
-      this.isAuto = !this.isAuto;
-      this.iconName = this.isAuto
-        ? "el-icon-video-play"
-        : "el-icon-video-pause";
+  watch: {
+    isAuto(newVal) {
+      this.iconName = newVal
+        ? "el-icon-video-pause"
+        : "el-icon-video-play"
+    },
+    value(newVal) {
+      this.time = newVal
     }
   }
 };
