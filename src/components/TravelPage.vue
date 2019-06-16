@@ -52,8 +52,8 @@ export default {
         }
       ],
       selectedFunc: {
-        text: "宏观指标",
-        command: 1
+        text: "网格OD",
+        command: 3
       },
       option: {
         bmap: {
@@ -117,7 +117,6 @@ export default {
           this.showChartList = true;
           var odMapSeries = await this.getOdDataOnMap();
           this.updateMap(odMapSeries);
-          this.drawDistrictMap([]);
           this.getDistrictOdChartData();
           break;
         case 3:
@@ -264,8 +263,9 @@ export default {
           name: `${p.fromName} - ${p.toName}`,
           coords: p.coords,
           lineStyle: {
-            //width:p.value
-            width: 5
+            color: "rgb(128, 128, 128)",
+            width: 1,
+            curveness: 1
           }
         };
       });

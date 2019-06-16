@@ -50,7 +50,7 @@ export default {
      */
     async datas(newVal) {
       if (newVal.data) {
-        this.initPolygons();
+        await this.initPolygons();
         let data = this.calculateColor(newVal.data, newVal.colors);
         this.fillColorOfPolygons(data);
       } else {
