@@ -15,7 +15,12 @@ export default {
       myChart: "",
       bmap: "",
       centerCoord: [],
-      polygons: null,
+      //行政区划polygon键值对，用于染色
+      polygons: {},
+      //行政区划label键值对
+      labels: {},
+      //初始overlay缓存
+      tempOverlay: [],
       buttons: null
     };
   },
@@ -37,11 +42,6 @@ export default {
       this.myChart.setOption(newVal);
       this.updateViewport(newVal);
     },
-    currentCity(newVal) {
-      console.log("MapView current city changed");
-      this.clearPolygons();
-      this.initPolygons();
-    },
     /*
     {
       data:[{name:"区县名称",value:"数值"}],
@@ -54,7 +54,9 @@ export default {
         let data = this.calculateColor(newVal.data, newVal.colors);
         this.fillColorOfPolygons(data);
       } else {
-        this.hidePolygons();
+        if (this.bmap) {
+          this.resetOverlays();
+        }
       }
     },
     mapSeries(newVal) {
@@ -112,21 +114,20 @@ export default {
         .getModel()
         .getComponent("bmap")
         .getBMap();
+      this.tempOverlay = this.bmap.getOverlays();
     },
 
     async initPolygons() {
-      if (this.polygons === null) {
-        this.polygons = {};
-        let polygon = await this.getDistrictPolygon();
-        this.drawDistrict(polygon);
-      }
+      let polygon = await this.getDistrictPolygon();
+      this.drawDistrict(polygon);
     },
 
-    clearPolygons() {
-      if (this.polygons != null) {
-        this.bmap.clearOverlays();
-        this.polygons = null;
-      }
+    //在切换回不需要polygon的场景时清理polygons
+    resetOverlays() {
+      this.bmap.clearOverlays();
+      this.tempOverlay.forEach(o => this.bmap.addOverlay(o));
+      this.polygons = {};
+      this.labels = {};
     },
 
     updateViewport(newVal) {
@@ -225,25 +226,13 @@ export default {
       "value":"数值"
     "color":"颜色"}]*/
     fillColorOfPolygons(data) {
-      if (this.polygons != null) {
+      if (Object.keys(this.polygons).length > 0) {
         data.forEach(d => {
           if (this.polygons[d.name]) {
             this.polygons[d.name].setFillColor(d.color);
             this.polygons[d.name].setFillOpacity(1);
             this.polygons[d.name].setStrokeOpacity(1);
           }
-        });
-      }
-    },
-
-    hidePolygons() {
-      if (this.polygons != null) {
-        console.log("hide polygons")
-        let keys = Object.keys(this.polygons);
-        keys.forEach(key => {
-          let polygon = this.polygons[key];
-          polygon.setFillOpacity(0);
-          polygon.setStrokeOpacity(0);
         });
       }
     },
@@ -310,6 +299,7 @@ export default {
           height: "20px",
           fontFamily: "微软雅黑"
         });
+        this.labels[datas[i].name] = label;
         this.bmap.addOverlay(label);
       }
       this.bmap.setViewport(pointArray);

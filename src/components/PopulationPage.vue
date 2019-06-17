@@ -151,7 +151,7 @@ export default {
       this.chartData = [];
       this.mapSeries = [];
       this.btnControl = [];
-      this.districtMapData = {};
+      this.$nextTick(() => this.districtMapData = {});
     },
 
     //更新人口动态分布地图
