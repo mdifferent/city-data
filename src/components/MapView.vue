@@ -60,6 +60,7 @@ export default {
       }
     },
     mapSeries(newVal) {
+      console.log(newVal)
       if (newVal instanceof Array) {
         this.$set(this.option, "series", newVal);
         this.myChart.setOption(this.option);

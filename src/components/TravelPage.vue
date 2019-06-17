@@ -52,8 +52,8 @@ export default {
         }
       ],
       selectedFunc: {
-        text: "网格OD",
-        command: 3
+        text: "宏观指标",
+        command: 1
       },
       option: {
         bmap: {
@@ -61,14 +61,15 @@ export default {
           zoom: 5,
           roam: true
         },
+        tooltip: {
+          trigger: "item"
+        },
         series: []
       },
       showChartList: false,
       chartData: [],
       currentOd: "o",
-      polygons: [],
       districtMapData: {},
-      cityCenterCoord: [],
       mapSeries: [],
       btnControl: []
     };
@@ -105,27 +106,30 @@ export default {
     PopulationChartBar
   },
   methods: {
-    async updateView() {
+    updateView() {
+      this.resetView();
       switch (this.selectedFunc.command) {
         case 1:
-          this.mapSeries = [];
-          this.districtMapData = await this.getGeneralDistrictData();
           this.showChartList = true;
+          this.getGeneralDistrictData();
           this.getGeneralChartData();
           break;
         case 2:
           this.showChartList = true;
-          var odMapSeries = await this.getOdDataOnMap();
-          this.updateMap(odMapSeries);
+          this.getOdDataOnMap();
           this.getDistrictOdChartData();
           break;
         case 3:
-          this.showChartList = false;
-          this.chartData = [];
-          var mapData = await this.getGridOdMapData();
-          this.updateMap(mapData);
+          this.getGridOdMapSeries();
           break;
       }
+    },
+
+    resetView() {
+      this.showChartList = false;
+      this.chartData = [];
+      this.mapSeries = [];
+      this.$nextTick(() => (this.districtMapData = {}));
     },
 
     //切换功能回调函数
@@ -158,41 +162,28 @@ export default {
       });
     },
 
-    //绘制地图以及上面的控件
-    async updateMap(series) {
-      if (this.cityCenterCoord.length == 0) {
-        await this.updateCityCenterCoord();
-      }
-      this.option = this.getMapOption(this.cityCenterCoord, series);
-    },
-
     //宏观指标：获取区县数据
     getGeneralDistrictData() {
-      return new Promise((resolve, reject) => {
-        var len = this.currentCity.length;
-        var cityName = this.currentCity[len - 1];
-        var dataUrl = `trip/${this.currentCuky}?city=${cityName}&date=${
-          this.currentDate
-        }&od=${this.currentOd}&time=`;
-        this.$axios
-          .get(dataUrl)
-          .then(response => {
-            var result = {
-              data: response.data,
-              colors: ["#FFFFE0", "#FFE4B5", "#FFFF00", "#FFD700", "#BDB76B"]
-            };
-            resolve(result);
-          })
-          .catch(error => {
-            reject(error);
-            console.log(error);
-          });
-      });
+      var len = this.currentCity.length;
+      var cityName = this.currentCity[len - 1];
+      var dataUrl = `trip/${this.currentCuky}?city=${cityName}&date=${
+        this.currentDate
+      }&od=${this.currentOd}&time=`;
+      this.$axios
+        .get(dataUrl)
+        .then(response => {
+          this.districtMapData = {
+            data: response.data,
+            colors: ["#FFFFE0", "#FFE4B5", "#FFFF00", "#FFD700", "#BDB76B"]
+          };
+        })
+        .catch(error => {
+          console.log(error);
+        });
     },
 
     //区域OD: 获取地图出行数据
     getOdDataOnMap() {
-      return new Promise((resolve, reject) => {
         var len = this.currentCity.length;
         var cityName = this.currentCity[len - 1];
         let intraUrl = `od/district/intra?city=${cityName}&date=${
@@ -207,18 +198,14 @@ export default {
           .all([intraReq, interReq])
           .then(
             this.$axios.spread((intraRes, interRes) => {
-              let series = [
-                this.getIntraSeries(intraRes.data.map(data => data.value))
-                //this.getInterSeries(interRes.data)
-              ];
-              resolve(series);
+              let intraSeries = this.getIntraSeries(intraRes.data);
+              let interSeries = this.getInterSeries(interRes.data);
+              this.mapSeries = [intraSeries, interSeries];
             })
           )
           .catch(error => {
-            reject(error);
             console.log(error);
           });
-      });
     },
 
     //区域OD: 获取地图出行数据
@@ -226,13 +213,8 @@ export default {
       return {
         id: "intra",
         name: "区内出行",
-        type: "scatter",
-        zlevel: 1,
+        type: "effectScatter",
         coordinateSystem: "bmap",
-        data: data /*,
-        symbolSize: function(val) {
-          return val[2] / 10;
-        },
         showEffectOn: "render",
         rippleEffect: {
           brushType: "stroke"
@@ -245,19 +227,12 @@ export default {
             show: true
           }
         },
-        itemStyle: {
-          normal: {
-            color: "yellow",
-            shadowBlur: 10,
-            shadowColor: "#333"
-          }
-        }*/
+        data: data
       };
     },
 
     //区域OD: 获取地图出行数据
     getInterSeries(payload) {
-      console.log(payload.length);
       var data = payload.map(p => {
         return {
           name: `${p.fromName} - ${p.toName}`,
@@ -265,7 +240,7 @@ export default {
           lineStyle: {
             color: "rgb(128, 128, 128)",
             width: 1,
-            curveness: 1
+            curveness: 0.3
           }
         };
       });
@@ -274,12 +249,14 @@ export default {
         name: "跨区出行",
         type: "lines",
         coordinateSystem: "bmap",
+        tooltip: {
+          show: false
+        },
         large: true,
         data: data
       };
     },
 
-    //绘制城市行政区县
 
     lineOption(xData, yoData, ydData) {
       return {
@@ -503,8 +480,7 @@ export default {
         });
     },
 
-    getGridOdMapData() {
-      return new Promise((resolve, reject) => {
+    getGridOdMapSeries() {
         var len = this.currentCity.length;
         var cityName = this.currentCity[len - 1];
         let gridOdUrl = `od/grid?city=${cityName}&date=${
@@ -513,50 +489,11 @@ export default {
         this.$axios
           .get(gridOdUrl)
           .then(response => {
-            let data = [this.getInterSeries(response.data)];
-            resolve(data);
+            this.mapSeries = [this.getInterSeries(response.data)];
           })
           .catch(error => {
-            reject(error);
             console.log(error);
-          });
       });
-
-      /*let data = [this.getInterSeries([{
-        fromName:"fromName",
-        toName:"toName",
-        value:1,
-        coords:[[111.735,40.795],[111.720,40.820]]
-      }])];
-      resolve(data)
-      })*/
-    },
-
-    getMapOption(center, series) {
-      return {
-        title: {
-          id: "map",
-          text: "map"
-        },
-        animation: false,
-        bmap: {
-          center: center,
-          zoom: 5,
-          roam: true
-        },
-        /*visualMap: {
-          show: false,
-          top: "top",
-          min: 0,
-          max: 1000,
-          seriesIndex: 0,
-          calculable: true,
-          inRange: {
-            color: ["blue", "yellow", "red"]
-          }
-        },*/
-        series: series
-      };
     }
   }
 };
