@@ -10,9 +10,10 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 #app {
   height: 100%;
   width: 100%;
+  background-color: #02427e;
 }
 </style>

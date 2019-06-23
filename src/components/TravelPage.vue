@@ -9,7 +9,7 @@
     </el-header>
     <el-main>
       <el-row>
-        <el-col :span="18">
+        <el-col :span="showChartList ? 18 : 24">
           <MapView
             :option="option"
             :datas="districtMapData"
@@ -17,7 +17,7 @@
             :btnControl="btnControl"
           />
         </el-col>
-        <el-col :span="6">
+        <el-col :span="showChartList ? 6 : 0">
           <PopulationChartBar v-if="showChartList" :chartData="chartData"/>
         </el-col>
       </el-row>
@@ -31,7 +31,6 @@ import MapView from "../components/MapView";
 import PopulationChartBar from "../components/PopulationChartBar";
 
 import { mapState } from "vuex";
-import { Promise } from "q";
 
 export default {
   name: "TravelPage",
@@ -84,7 +83,6 @@ export default {
   },
   watch: {
     async currentCity(newVal) {
-      var result = await this.updateCityCenterCoord();
       this.updateView();
     },
     currentTime(newVal) {
@@ -138,30 +136,6 @@ export default {
       this.updateView();
     },
 
-    //根据当前城市获取城市中心坐标
-    updateCityCenterCoord() {
-      return new Promise((resolve, reject) => {
-        if (this.currentCity) {
-          var len = this.currentCity.length;
-          if (len > 0) {
-            var cityName = this.currentCity[len - 1];
-            //当前城市中心坐标
-            var centerUrl = `basic/cityCoords?city=${cityName}`;
-            var centerCoordRq = this.$axios
-              .get(centerUrl)
-              .then(response => {
-                let coord = [response.data[0].lng, response.data[0].lat];
-                resolve(coord);
-              })
-              .catch(error => {
-                reject(error);
-                console.log(error);
-              });
-          }
-        }
-      });
-    },
-
     //宏观指标：获取区县数据
     getGeneralDistrictData() {
       var len = this.currentCity.length;
@@ -184,28 +158,28 @@ export default {
 
     //区域OD: 获取地图出行数据
     getOdDataOnMap() {
-        var len = this.currentCity.length;
-        var cityName = this.currentCity[len - 1];
-        let intraUrl = `od/district/intra?city=${cityName}&date=${
-          this.currentDate
-        }&cuky=${this.currentCuky}&time=${this.currentTime}`;
-        let intraReq = this.$axios.get(intraUrl);
-        let interUrl = `od/district/inter?city=${cityName}&date=${
-          this.currentDate
-        }&cuky=${this.currentCuky}&time=${this.currentTime}`;
-        let interReq = this.$axios.get(interUrl);
-        this.$axios
-          .all([intraReq, interReq])
-          .then(
-            this.$axios.spread((intraRes, interRes) => {
-              let intraSeries = this.getIntraSeries(intraRes.data);
-              let interSeries = this.getInterSeries(interRes.data);
-              this.mapSeries = [intraSeries, interSeries];
-            })
-          )
-          .catch(error => {
-            console.log(error);
-          });
+      var len = this.currentCity.length;
+      var cityName = this.currentCity[len - 1];
+      let intraUrl = `od/district/intra?city=${cityName}&date=${
+        this.currentDate
+      }&cuky=${this.currentCuky}&time=${this.currentTime}`;
+      let intraReq = this.$axios.get(intraUrl);
+      let interUrl = `od/district/inter?city=${cityName}&date=${
+        this.currentDate
+      }&cuky=${this.currentCuky}&time=${this.currentTime}`;
+      let interReq = this.$axios.get(interUrl);
+      this.$axios
+        .all([intraReq, interReq])
+        .then(
+          this.$axios.spread((intraRes, interRes) => {
+            let intraSeries = this.getIntraSeries(intraRes.data);
+            let interSeries = this.getInterSeries(interRes.data);
+            this.mapSeries = [intraSeries, interSeries];
+          })
+        )
+        .catch(error => {
+          console.log(error);
+        });
     },
 
     //区域OD: 获取地图出行数据
@@ -256,7 +230,6 @@ export default {
         data: data
       };
     },
-
 
     lineOption(xData, yoData, ydData) {
       return {
@@ -481,19 +454,19 @@ export default {
     },
 
     getGridOdMapSeries() {
-        var len = this.currentCity.length;
-        var cityName = this.currentCity[len - 1];
-        let gridOdUrl = `od/grid?city=${cityName}&date=${
-          this.currentDate
-        }&cuky=${this.currentCuky}&time=${this.currentTime}`;
-        this.$axios
-          .get(gridOdUrl)
-          .then(response => {
-            this.mapSeries = [this.getInterSeries(response.data)];
-          })
-          .catch(error => {
-            console.log(error);
-      });
+      var len = this.currentCity.length;
+      var cityName = this.currentCity[len - 1];
+      let gridOdUrl = `od/grid?city=${cityName}&date=${this.currentDate}&cuky=${
+        this.currentCuky
+      }&time=${this.currentTime}`;
+      this.$axios
+        .get(gridOdUrl)
+        .then(response => {
+          this.mapSeries = [this.getInterSeries(response.data)];
+        })
+        .catch(error => {
+          console.log(error);
+        });
     }
   }
 };

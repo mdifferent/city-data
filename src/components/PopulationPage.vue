@@ -29,14 +29,9 @@
 <script>
 import SubHeader from "../components/SubHeader";
 import MapView from "../components/MapView";
-import TotalChart from "../components/TotalChart";
-import GeoMapView from "../components/GeoMapView";
 
 import PopulationTimeSlider from "../components/PopulationTimeSlider";
 import PopulationChartBar from "../components/PopulationChartBar";
-
-//MockData
-import transportData from "../static/mockData/transportData.json";
 
 import { mapState } from "vuex";
 import { Promise } from "q";

@@ -1,6 +1,6 @@
 <template>
   <el-col>
-    <div v-for="item in chartData" v-bind:key="item.id">
+    <div class="chartdiv" v-for="item in chartData" v-bind:key="item.id">
       <el-row>
         <el-col :span="24">
           <TotalChart :id="item.id" :option="item.option"></TotalChart>
@@ -29,3 +29,13 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+.chartdiv {
+  position: relative;
+  right: 0px;
+  top: 5px;
+  height: 100%;
+  width: 25%;
+}
+</style>

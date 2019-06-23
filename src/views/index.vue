@@ -7,6 +7,7 @@
       <MainPage v-if="currentPage===null"/>
       <PopulationPage v-else-if="currentPage === '人口分布'"/>
       <TravelPage v-else-if="currentPage === '出行指标'"/>
+      <GridPage v-else-if="currentPage === '区域分析'" />
     </el-main>
   </el-container>
 </template>
@@ -16,6 +17,7 @@ import MainPage from "../components/MainPage";
 import PageHeader from "../components/PageHeader";
 import PopulationPage from "../components/PopulationPage";
 import TravelPage from "../components/TravelPage";
+import GridPage from "../components/GridPage";
 
 import { mapState } from 'vuex'
 
@@ -34,7 +36,8 @@ export default {
     PageHeader,
     MainPage,
     PopulationPage,
-    TravelPage
+    TravelPage,
+    GridPage
   }
 };
 </script>
@@ -45,7 +48,6 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+  background: url(../assets/true.png);
 }
 </style>
