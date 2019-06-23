@@ -6,13 +6,13 @@
       <el-image :src="url" fit="cover"></el-image>
     </el-col>-->
     <el-col :span="16">
-      <p>{{title}}</p>
+      <h3 class="page_text">{{title}}</h3>
       <el-row type="flex" align="middle">
         <el-col :span="20">
-            <p>{{itemcount}}</p>
+            <h1 class="data_color">{{itemcount}}</h1>
         </el-col>
         <el-col :span="4">
-            <p>{{unit}}</p>
+            <p class="page_text">{{unit}}</p>
         </el-col>
       </el-row>
     </el-col>
@@ -34,3 +34,5 @@ export default {
   }
 };
 </script>
+
+

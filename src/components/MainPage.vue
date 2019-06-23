@@ -27,11 +27,11 @@
             ></GeoMapView>
           </el-col>
         </el-row>
-        <el-row type="flex">
+        <!--<el-row type="flex">
           <el-col v-for="item in chartData1" v-bind:key="item.id">
             <TotalChart :id="item.id" :option="item.option"></TotalChart>
           </el-col>
-        </el-row>
+        </el-row>-->
       </el-col>
       <el-col :span="4">
         <div v-for="item in chartData" v-bind:key="item.id">
@@ -283,7 +283,12 @@ export default {
       return {
         color: ["#006699", "#e5323e"],
         title: {
-          text: title
+          text: title,
+          textStyle: {
+            color: "rgb(78, 170, 201)",
+            fontStyle: "italic",
+            fontWeight: "bold"
+          }
         },
         tooltip: {
           trigger: "axis",
@@ -295,12 +300,16 @@ export default {
           data: xData,
           axisLabel: {
             interval: 0,
-            rotate: 75
+            rotate: 75,
+            color: "white"
           }
         },
         yAxis: [
           {
-            type: "value"
+            type: "value",
+            axisLabel: {
+              color: "white"
+            }
           }
         ],
         series: series
@@ -342,3 +351,4 @@ a {
   color: #42b983;
 }
 </style>
+

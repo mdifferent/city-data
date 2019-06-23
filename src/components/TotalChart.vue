@@ -18,11 +18,11 @@ export default {
     id: String,
     width: {
       type: String,
-      default: "400px"
+      default: "22rem"
     },
     height: {
       type: String,
-      default: "300px"
+      default: "16rem"
     },
     option: {
       type: Object

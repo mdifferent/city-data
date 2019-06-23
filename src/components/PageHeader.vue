@@ -2,24 +2,24 @@
   <div id="header">
     <el-row type="flex" align="middle">
       <el-col :span="2">
-        <p>首页</p>
+        <p class="page_text">首页</p>
       </el-col>
       <el-col :span="5">
         <el-cascader placeholder="城市" :options="options" filterable @change="changeCity"></el-cascader>
       </el-col>
-      <el-col :span="7">
-        <h1>城建设计手机数据可视化平台</h1>
+      <el-col :span="10">
+        <h1 class="page_text">城建设计手机数据可视化平台</h1>
       </el-col>
-      <el-col :span="6">
+      <el-col :span="5">
         <el-radio-group v-model="radio1" size="medium" @change="onPageButtonClicked">
           <el-radio-button label="人口分布"></el-radio-button>
           <el-radio-button label="出行指标"></el-radio-button>
           <el-radio-button label="区域分析"></el-radio-button>
         </el-radio-group>
       </el-col>
-      <el-col :span="4">
+      <el-col :span="2">
         <el-dropdown trigger="click">
-          <span class="el-dropdown-link">
+          <span class="el-dropdown-link, page_text" >
             用户
             <i class="el-icon-arrow-down el-icon--right"></i>
           </span>
@@ -84,3 +84,14 @@ export default {
   }
 };
 </script>
+
+<style>
+.page_text {
+  font-family:"Times New Roman",Georgia,Serif;
+  font-weight:bolder;
+  color: rgb(78, 170, 201);
+}
+.data_color {
+  color: white;
+}
+</style>
