@@ -7,7 +7,7 @@
 <script>
 import { mapState } from "vuex";
 import { Promise } from "q";
-
+import BMap from 'BMap';
 export default {
   name: "MapView",
   data() {
@@ -67,6 +67,13 @@ export default {
       }
     },
     btnControl(newVal) {
+      if (this.bmap === null) {
+        console.error("bmap is null")
+        this.bmap = this.myChart
+        .getModel()
+        .getComponent("bmap")
+        .getBMap();
+      }
       if (newVal.length == 0) {
         if (this.buttons != null) {
           this.bmap.removeControl(this.buttons);
@@ -77,9 +84,9 @@ export default {
       }
       function DimensionControl() {
         this.defaultAnchor = BMAP_ANCHOR_TOP_LEFT;
-        this.defaultOffset = new window.BMap.Size(10, 10);
+        this.defaultOffset = new BMap.Size(10, 10);
       }
-      DimensionControl.prototype = new window.BMap.Control();
+      DimensionControl.prototype = new BMap.Control();
       DimensionControl.prototype.initialize = function(map) {
         var div = document.createElement("div");
         div.style.cursor = "pointer";
@@ -137,18 +144,18 @@ export default {
           if (s.type === "lines") {
             s.data.forEach(d => {
               pointArray.push(
-                new window.BMap.Point(d.coords[0][0], d.coords[0][1])
+                new BMap.Point(d.coords[0][0], d.coords[0][1])
               );
             });
           } else if (s.type === "scatters" || s.type === "effectScatter") {
             s.data.forEach(d => {
-              pointArray.push(new window.BMap.Point(d.value[0], d.value[1]));
+              pointArray.push(new BMap.Point(d.value[0], d.value[1]));
             });
-          } else if (s.type === "heatmap") {
+          } else if (s.type === "heatmap" || s.type === "custom") {
             s.data.forEach(d => {
-              pointArray.push(new window.BMap.Point(d[0], d[1]));
+              pointArray.push(new BMap.Point(d[0], d[1]));
             });
-          }
+          } 
         });
         this.bmap.setViewport(pointArray);
       }
@@ -276,7 +283,7 @@ export default {
       var pointArray = [];
       for (var i = 0; i < count; i++) {
         //绘制行政边界
-        var ply = new window.BMap.Polygon(datas[i].polygon, {
+        var ply = new BMap.Polygon(datas[i].polygon, {
           strokeWeight: 2,
           strokeColor: "#808080",
           strokeOpacity: 0,
@@ -290,7 +297,7 @@ export default {
 
         //绘制区县名称
         var labelPosition = {
-          position: new window.BMap.Point(datas[i].coord[0], datas[i].coord[1])
+          position: new BMap.Point(datas[i].coord[0], datas[i].coord[1])
         };
         var label = new window.BMap.Label(datas[i].name, labelPosition);
         label.setStyle({

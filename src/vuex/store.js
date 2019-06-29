@@ -7,45 +7,49 @@ import Vuex from 'vuex'
 Vue.use(Vuex)
 
 export default new Vuex.Store({
-  state: {
-    currentCity: [],
-    currentPage: null,
-    currentDateType: {
-      text: "工作日",
-      command: "w"
+    state: {
+        currentCity: [],
+        currentPage: null,
+        currentDateType: {
+            text: "工作日",
+            command: "w"
+        },
+        currentTimeRange: {
+            text: "早高峰",
+            command: "1"
+        },
+        currentCuky: "cu",
+        currentRegion: null
     },
-    currentTimeRange: {
-      text: "早高峰",
-      command: "1"
+    mutations: {
+        changeCity(state, newCity) {
+            state.currentCity = newCity
+        },
+        changePage(state, page) {
+            state.currentPage = page
+        },
+        changeDateType(state, type) {
+            state.currentDateType = type
+        },
+        changeTimeRange(state, time) {
+            state.currentTimeRange = time
+        },
+        changeCuky(state, cuky) {
+            if (cuky === '原始数据')
+                state.currentCuky = 'cu'
+            else if (cuky === '扩样数据')
+                state.currentCuky = 'ky'
+        },
+        changeRegion(state, region) {
+            state.currentRegion = region
+        }
     },
-    currentCuky: "cu"
-  },
-  mutations: {
-    changeCity (state, newCity) {
-      state.currentCity = newCity
+    actions: {
+
     },
-    changePage (state, page) {
-      state.currentPage = page
+    getters: {
+        currentCity: (state) => state.currentCity,
+        currentPage: (state) => state.currentPage
     },
-    changeDateType (state, type) {
-      state.currentDateType = type
-    },
-    changeTimeRange (state, time) {
-      state.currentTimeRange = time
-    },
-    changeCuky (state, cuky) {
-      if (cuky === '原始数据')
-        state.currentCuky = 'cu'
-      else if (cuky === '扩样数据')
-        state.currentCuky = 'ky'
-    }
-  },
-  actions:{
-    
-  },
-  getters: {
-    currentCity: (state) => state.currentCity,
-    currentPage: (state) => state.currentPage
-  },
-  strict: false
+    strict: false
 })

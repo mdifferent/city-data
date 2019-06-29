@@ -508,7 +508,8 @@ export default {
         },
         yAxis: {
           type: "category",
-          data: xData
+          data: xData,
+          max: 110
         },
         series: [
           {
